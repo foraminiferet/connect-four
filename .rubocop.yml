@@ -1,0 +1,34 @@
+# The behavior of RuboCop can be controlled via the .rubocop.yml
+# configuration file. It makes it possible to enable/disable
+# certain cops (checks) and to alter their behavior if they accept
+# any parameters. The file can be placed either in your home
+# directory or in some project directory.
+#
+# RuboCop will start looking for the configuration file in the directory
+# where the inspected file is and continue its way up to the root directory.
+#
+# See https://docs.rubocop.org/rubocop/configuration
+# Load the rubocop-rspec extension
+require:
+  - rubocop-rspec
+
+# Basic configuration for RuboCop and RSpec
+AllCops:
+  TargetRubyVersion: 3.0 # Adjust based on your Ruby version
+
+# RSpec-specific configuration (customize as needed)
+RSpec:
+  Enabled: true # Ensure RSpec rules are enabled
+
+# Example of disabling specific RSpec rules
+RSpec/SubjectStub:
+  Enabled: false # Disable the rule about subject stubs
+
+# Additional configuration options
+Metrics/LineLength:
+  Max: 120 # Set maximum line length to 120 characters
+
+# You can add other RuboCop rules here
+# For example, to disable specific RuboCop rules:
+Style/FrozenStringLiteralComment:
+  Enabled: false
