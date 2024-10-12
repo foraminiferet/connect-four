@@ -18,11 +18,11 @@ class Board
     puts '-----------------'
   end
 
-  def update_board(row, colum, symbol)
-    @grid[row - 1][colum - 1] = symbol
+  def update_board(row, column, symbol)
+    @grid[row][column] = symbol
   end
 
-  def valid_move?(row, colum)
-    row.between?(1, 6) && colum.between?(1, 7) && @grid[row - 1][colum - 1] == blank_circle
+  def valid_move?(row, column)
+    row.between?(0, 5) && column.between?(0, 6) && @grid[row][column] == blank_circle
   end
 end
