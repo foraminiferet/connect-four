@@ -10,7 +10,26 @@ class Game
     @board = Board.new
     @player_one = Player.new(yellow_circle, 'Player 1')
     @player_two = Player.new(red_circle, 'Player 2')
-    @round = 0
+    @round = 1
+  end
+
+  def play
+    game_intructions
+    @board.display_board
+    loop do
+      row_index, column_index = turn_input
+      row_index, column_index = turn_input until @board.valid_move?(row_index, column_index)
+      break if game_over?(row_index, column_index, current_player.symbol)
+
+      round_outcome_and_player_switch(row_index, column_index)
+    end
+    @board.display_board
+  end
+
+  def round_outcome_and_player_switch(row, column)
+    @board.update_board(row, column, current_player.symbol)
+    @board.display_board
+    @round += 1
   end
 
   def turn_input
@@ -44,15 +63,15 @@ class Game
     gets.chomp
   end
 
-  # TODO: change this method for keeping count of the current player and switching the player
+  # Keeps track of current player
   def current_player
-    @round += 1
     @round.odd? ? @player_one : @player_two
   end
 
   def game_over?(last_row, last_column, symbol)
+    @board.update_board(last_row, last_column, symbol)
     if player_won?(last_row, last_column, symbol)
-      puts "Player #{current_player.name} wins!"
+      puts "Congradulations: #{current_player.name} wins!"
       return true
     elsif board_full?
       puts "It's a draw!"
@@ -61,44 +80,36 @@ class Game
     false
   end
 
+  # For drawn games
   def board_full?
     @board.grid.flatten.none? { |cell| cell == blank_circle }
   end
 
+  # Player win conditions
   def player_won?(row, colunm, symbol)
     vertical_win?(row, colunm, symbol) ||
       horizontal_win?(row, colunm, symbol) ||
       diagonal_win?(row, colunm, symbol)
   end
 
-  # TODO: connect four methods don't work as expected
-
-  # We subtract the one in the winning conditions count because:
-  # we start checking for four in a row from the current position in 2 directions simultaneously
-  # and since we start form the current positon for connect four both directions contain the starting position
-  # so we need to  subtract the overlap(the starting position)
-  #  1 + consecutive_connected that 1 is the starting position that we are adding to both directions
-
   # Check if we have four connected in a column
   def vertical_win?(row, col, symbol)
-    count = consecutive_connected(row - 1, col, -1, 0,
-                                  symbol) + consecutive_connected(row + 1, col, 1, 0, symbol) - 1
+    count = consecutive_connected(row - 1, col, -1, 0, symbol) + consecutive_connected(row + 1, col, 1, 0, symbol) + 1
     count >= 4
   end
 
   # Check for four in a row same explanation for subtracting 1 as in the vertical
   def horizontal_win?(row, col, symbol)
-    count = consecutive_connected(row, col - 1, 0, -1,
-                                  symbol) + consecutive_connected(row, col + 1, 0, 1, symbol) - 1
+    count = consecutive_connected(row, col - 1, 0, -1, symbol) + consecutive_connected(row, col + 1, 0, 1, symbol) + 1
     count >= 4
   end
 
   # Chech the left and right diagonal for four connected
   def diagonal_win?(row, col, symbol)
     count1 = consecutive_connected(row - 1, col - 1, -1, -1,
-                                   symbol) + consecutive_connected(row + 1, col + 1, 1, 1, symbol) - 1
+                                   symbol) + consecutive_connected(row + 1, col + 1, 1, 1, symbol) + 1
     count2 = consecutive_connected(row - 1, col + 1, -1, 1,
-                                   symbol) + consecutive_connected(row + 1, col - 1, 1, -1, symbol)
+                                   symbol) + consecutive_connected(row + 1, col - 1, 1, -1, symbol) + 1
     (count1 >= 4) || (count2 >= 4)
   end
 
