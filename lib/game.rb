@@ -13,39 +13,20 @@ class Game
     @round = 0
   end
 
-  def play
-    game_intructions
-    loop do
-      active_player = current_player
-      @board.display_board
-      row_index, column_index = player_input(active_player)
-      validate_move(row_index, column_index)
-      @board.update_board(row_index, column_index, active_player.symbol)
-
-      break if game_over?(row_index, column_index, active_player.symbol)
-    end
-    @board.display_board
-  end
-
-  def validate_move(row_index, column_index)
-    until @board.valid_move?(row_index, column_index)
-      puts 'Ivalid move'
-      row_index, column_index = player_input(active_player)
-    end
-  end
-
-  def player_input(active_player)
-    puts "#{active_player.name}'s turn.\nPlease enter the row and colum you want to fill in format aXb(exmp. 1x3): "
-    input = nil
-    loop do
-      input = gets.chomp
-      break if valid_input?(input)
-
-      puts 'Incorrect forma entered, please try agin.'
-    end
+  def turn_input
+    input = prompt_for_valid_input
     row_index = input[0].to_i - 1
     column_index = input[2].to_i - 1
     [row_index, column_index]
+  end
+
+  def prompt_for_valid_input
+    loop do
+      input = player_input
+      return input if valid_input?(input)
+
+      puts 'Incorrect format entered, please try again.'
+    end
   end
 
   def valid_input?(input)
@@ -58,6 +39,12 @@ class Game
     end
   end
 
+  def player_input
+    puts "#{current_player.name}'s turn.\nPlease enter the row and colum you want to fill in format aXb(exmp. 1x3): "
+    gets.chomp
+  end
+
+  # TODO: change this method for keeping count of the current player and switching the player
   def current_player
     @round += 1
     @round.odd? ? @player_one : @player_two
@@ -96,7 +83,6 @@ class Game
   def vertical_win?(row, col, symbol)
     count = consecutive_connected(row - 1, col, -1, 0,
                                   symbol) + consecutive_connected(row + 1, col, 1, 0, symbol) - 1
-    p count
     count >= 4
   end
 
@@ -104,7 +90,6 @@ class Game
   def horizontal_win?(row, col, symbol)
     count = consecutive_connected(row, col - 1, 0, -1,
                                   symbol) + consecutive_connected(row, col + 1, 0, 1, symbol) - 1
-    p count
     count >= 4
   end
 
@@ -119,7 +104,7 @@ class Game
 
   # Checking for consecutive connectd
   def consecutive_connected(row, column, row_delta, col_delta, symbol)
-    return 0 if row < 0 || row >= 6 || column < 0 || column >= 7
+    return 0 if row.negative? || row >= 6 || column.negative? || column >= 7
     return 0 if @board.grid[row][column] != symbol
 
     1 + consecutive_connected(row + row_delta, column + col_delta, row_delta, col_delta, symbol)
