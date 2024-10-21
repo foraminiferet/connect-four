@@ -13,53 +13,39 @@ class Game
     @round = 1
   end
 
+  # TO PLAYSER INPUT, VALIDATION, GAME WIN CONDITIONS
   def play
     game_intructions
     @board.display_board
     loop do
-      row_index, column_index = turn_input
-      row_index, column_index = turn_input until @board.valid_move?(row_index, column_index)
-      break if game_over?(row_index, column_index, current_player.symbol)
-
-      round_outcome_and_player_switch(row_index, column_index)
-    end
-    @board.display_board
-  end
-
-  def round_outcome_and_player_switch(row, column)
-    @board.update_board(row, column, current_player.symbol)
-    @board.display_board
-    @round += 1
-  end
-
-  def turn_input
-    input = prompt_for_valid_input
-    row_index = input[0].to_i - 1
-    column_index = input[2].to_i - 1
-    [row_index, column_index]
-  end
-
-  def prompt_for_valid_input
-    loop do
       input = player_input
-      return input if valid_input?(input)
-
-      puts 'Incorrect format entered, please try again.'
+      input = player_input unless valid_input?(input)
+      row, column = turn_outcome(input.to_i - 1)
+      break if game_over?(row, column, current_player.symbol)
     end
+    @board.display_board
   end
 
+  def turn_outcome(input)
+    row = @board.next_free_position(input)
+    @board.update_board(input, current_player.symbol)
+    @board.display_board
+    [row, input]
+  end
+
+  # Validation for user input
   def valid_input?(input)
-    if input =~ /^(\d)x(\d)$/i
-      first_number = ::Regexp.last_match(1).to_i
-      second_number = ::Regexp.last_match(2).to_i
-      first_number.between?(1, 6) && second_number.between?(1, 7)
+    if input =~ /\A[1-7]\z/ && @board.valid_move?(input.to_i - 1)
+      true
     else
+      puts 'Incorrect input entered please try again'
       false
     end
   end
 
+  # Get user input form stdin
   def player_input
-    puts "#{current_player.name}'s turn.\nPlease enter the row and colum you want to fill in format aXb(exmp. 1x3): "
+    puts "#{current_player.name}'s turn.\nPlease enter the colum you want to fill in [1-7](exmp. '1'): "
     gets.chomp
   end
 
@@ -68,6 +54,7 @@ class Game
     @round.odd? ? @player_one : @player_two
   end
 
+  # We update the board the final time so thath the output would be correct
   def game_over?(last_row, last_column, symbol)
     @board.update_board(last_row, last_column, symbol)
     if player_won?(last_row, last_column, symbol)
@@ -106,11 +93,11 @@ class Game
 
   # Chech the left and right diagonal for four connected
   def diagonal_win?(row, col, symbol)
-    count1 = consecutive_connected(row - 1, col - 1, -1, -1,
-                                   symbol) + consecutive_connected(row + 1, col + 1, 1, 1, symbol) + 1
-    count2 = consecutive_connected(row - 1, col + 1, -1, 1,
-                                   symbol) + consecutive_connected(row + 1, col - 1, 1, -1, symbol) + 1
-    (count1 >= 4) || (count2 >= 4)
+    count_left_diagonal = consecutive_connected(row - 1, col - 1, -1, -1,
+                                                symbol) + consecutive_connected(row + 1, col + 1, 1, 1, symbol) + 1
+    count_right_diagonal = consecutive_connected(row - 1, col + 1, -1, 1,
+                                                 symbol) + consecutive_connected(row + 1, col - 1, 1, -1, symbol) + 1
+    (count_left_diagonal >= 4) || (count_right_diagonal >= 4)
   end
 
   # Checking for consecutive connectd

@@ -10,19 +10,26 @@ class Board
 
   def display_board
     puts
-    grid.each_with_index do |row, index|
-      puts "#{index + 1} #{row.join(' ')}"
+    grid.each do |row|
+      puts " #{row.join(' ')}"
     end
-    puts "  #{(1..7).to_a.join(' ')}"
+    puts " #{(1..7).to_a.join(' ')}"
     puts
     puts '-----------------'
   end
 
-  def update_board(row, column, symbol)
-    @grid[row][column] = symbol
+  def update_board(input, symbol)
+    free_position = next_free_position(input)
+    @grid[free_position][input] = symbol
   end
 
-  def valid_move?(row, column)
-    row.between?(0, 5) && column.between?(0, 6) && @grid[row][column] == blank_circle
+  def next_free_position(input)
+    5.downto(0) do |i|
+      return i if @grid[i][input] == blank_circle
+    end
+  end
+
+  def valid_move?(input)
+    input.between?(0, 6) && @grid[0][input] == blank_circle
   end
 end
