@@ -17,8 +17,8 @@ class Game
     game_intructions
     @board.display_board
     loop do
-      row_index, column_index = turn_input
-      row_index, column_index = turn_input until @board.valid_move?(column_index)
+      row_index, column_index = piece_position
+      row_index, column_index = piece_position until @board.valid_move?(column_index)
       break if game_over?(row_index, column_index, current_player.symbol)
 
       round_outcome_and_player_switch(column_index)
@@ -26,12 +26,8 @@ class Game
     @board.display_board
   end
 
-  def turn_input
-    input = player_input
-    until valid_input?(input)
-      puts 'Incorrect input please try again'
-      input = player_input
-    end
+  def piece_position
+    input = valid_input
     column_index = input.to_i - 1
     row_index = @board.next_free_position(column_index)
     [row_index, column_index]
@@ -43,14 +39,24 @@ class Game
     @round += 1
   end
 
-  # Validation for user input
-  def valid_input?(input)
+  # Loop until we get a valid input form the user
+  def valid_input
+    input  = player_input
+    until single_digit?(input)
+      puts 'Incorrect input please try again'
+      input = player_input
+    end
+    input
+  end
+
+  # Checking if the input is a digit between 1 and 7
+  def single_digit?(input)
     !!(input =~ /\A[1-7]\z/)
   end
 
   # Get user input form stdin
   def player_input
-    puts "#{current_player.name}'s turn.\nPlease enter the colum you want to fill in [1-7](exmp. '1'): "
+    puts "#{current_player.name}'s turn.\nPlease enter the colum you want to fill in [1-7](exmpl. '1'): "
     gets.chomp
   end
 
@@ -59,7 +65,7 @@ class Game
     @round.odd? ? @player_one : @player_two
   end
 
-  # We update the board the final time so thath the output would be correct
+  # We update the board the final time so thath the display would be correct
   def game_over?(last_row, last_column, symbol)
     if player_won?(last_row, last_column, symbol)
       @board.update_board(last_column, symbol)
@@ -91,7 +97,7 @@ class Game
     count >= 4
   end
 
-  # Check for four in a row same explanation for subtracting 1 as in the vertical
+  # Check for four in a row
   def horizontal_win?(row, col, symbol)
     count = consecutive_connected(row, col - 1, 0, -1, symbol) + consecutive_connected(row, col + 1, 0, 1, symbol) + 1
     count >= 4

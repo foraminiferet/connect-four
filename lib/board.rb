@@ -9,6 +9,7 @@ class Board
   end
 
   def display_board
+    puts '-----------------'
     puts
     grid.each do |row|
       puts " #{row.join(' ')}"
