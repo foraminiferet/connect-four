@@ -13,34 +13,39 @@ class Game
     @round = 1
   end
 
-  # TO PLAYSER INPUT, VALIDATION, GAME WIN CONDITIONS
   def play
     game_intructions
     @board.display_board
     loop do
-      input = player_input
-      input = player_input unless valid_input?(input)
-      row, column = turn_outcome(input.to_i - 1)
-      break if game_over?(row, column, current_player.symbol)
+      row_index, column_index = turn_input
+      row_index, column_index = turn_input until @board.valid_move?(column_index)
+      break if game_over?(row_index, column_index, current_player.symbol)
+
+      round_outcome_and_player_switch(column_index)
     end
     @board.display_board
   end
 
-  def turn_outcome(input)
-    row = @board.next_free_position(input)
+  def turn_input
+    input = player_input
+    until valid_input?(input)
+      puts 'Incorrect input please try again'
+      input = player_input
+    end
+    column_index = input.to_i - 1
+    row_index = @board.next_free_position(column_index)
+    [row_index, column_index]
+  end
+
+  def round_outcome_and_player_switch(input)
     @board.update_board(input, current_player.symbol)
     @board.display_board
-    [row, input]
+    @round += 1
   end
 
   # Validation for user input
   def valid_input?(input)
-    if input =~ /\A[1-7]\z/ && @board.valid_move?(input.to_i - 1)
-      true
-    else
-      puts 'Incorrect input entered please try again'
-      false
-    end
+    !!(input =~ /\A[1-7]\z/)
   end
 
   # Get user input form stdin
@@ -56,11 +61,12 @@ class Game
 
   # We update the board the final time so thath the output would be correct
   def game_over?(last_row, last_column, symbol)
-    @board.update_board(last_row, last_column, symbol)
     if player_won?(last_row, last_column, symbol)
+      @board.update_board(last_column, symbol)
       puts "Congradulations: #{current_player.name} wins!"
       return true
     elsif board_full?
+      @board.update_board(last_column, symbol)
       puts "It's a draw!"
       return true
     end
