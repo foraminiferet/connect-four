@@ -1,5 +1,4 @@
 require_relative 'board'
-require_relative 'database'
 require_relative 'player'
 require_relative 'figurines'
 
@@ -21,7 +20,7 @@ class Game
       row_index, column_index = piece_position until @board.valid_move?(column_index)
       break if game_over?(row_index, column_index, current_player.symbol)
 
-      round_outcome_and_player_switch(column_index)
+      show_board_and_player_switch
     end
     @board.display_board
   end
@@ -33,8 +32,7 @@ class Game
     [row_index, column_index]
   end
 
-  def round_outcome_and_player_switch(input)
-    @board.update_board(input, current_player.symbol)
+  def show_board_and_player_switch
     @board.display_board
     @round += 1
   end
@@ -65,14 +63,13 @@ class Game
     @round.odd? ? @player_one : @player_two
   end
 
-  # We update the board the final time so thath the display would be correct
+  # We update the board each time before we test for the winning condition
   def game_over?(last_row, last_column, symbol)
+    @board.update_board(last_column, symbol)
     if player_won?(last_row, last_column, symbol)
-      @board.update_board(last_column, symbol)
       puts "Congradulations: #{current_player.name} wins!"
       return true
     elsif board_full?
-      @board.update_board(last_column, symbol)
       puts "It's a draw!"
       return true
     end
@@ -84,7 +81,7 @@ class Game
     @board.grid.flatten.none? { |cell| cell == blank_circle }
   end
 
-  # Player win conditions
+  # Player win conditions(we subtract 1 in each win condition because we count the statrting position 2 times)
   def player_won?(row, colunm, symbol)
     vertical_win?(row, colunm, symbol) ||
       horizontal_win?(row, colunm, symbol) ||
@@ -93,22 +90,22 @@ class Game
 
   # Check if we have four connected in a column
   def vertical_win?(row, col, symbol)
-    count = consecutive_connected(row - 1, col, -1, 0, symbol) + consecutive_connected(row + 1, col, 1, 0, symbol) + 1
+    count = consecutive_connected(row, col, -1, 0, symbol) + consecutive_connected(row, col, 1, 0, symbol) - 1
     count >= 4
   end
 
   # Check for four in a row
   def horizontal_win?(row, col, symbol)
-    count = consecutive_connected(row, col - 1, 0, -1, symbol) + consecutive_connected(row, col + 1, 0, 1, symbol) + 1
+    count = consecutive_connected(row, col, 0, -1, symbol) + consecutive_connected(row, col, 0, 1, symbol) - 1
     count >= 4
   end
 
   # Chech the left and right diagonal for four connected
   def diagonal_win?(row, col, symbol)
-    count_left_diagonal = consecutive_connected(row - 1, col - 1, -1, -1,
-                                                symbol) + consecutive_connected(row + 1, col + 1, 1, 1, symbol) + 1
-    count_right_diagonal = consecutive_connected(row - 1, col + 1, -1, 1,
-                                                 symbol) + consecutive_connected(row + 1, col - 1, 1, -1, symbol) + 1
+    count_left_diagonal = consecutive_connected(row, col, -1, -1,
+                                                symbol) + consecutive_connected(row, col, 1, 1, symbol) - 1
+    count_right_diagonal = consecutive_connected(row, col, -1, 1,
+                                                 symbol) + consecutive_connected(row, col, 1, -1, symbol) - 1
     (count_left_diagonal >= 4) || (count_right_diagonal >= 4)
   end
 
