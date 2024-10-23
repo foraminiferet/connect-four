@@ -1,5 +1,6 @@
 require_relative 'figurines'
 
+# Board class wwith methods for diplaye and updating the board
 class Board
   include Figurines
   attr_reader :grid

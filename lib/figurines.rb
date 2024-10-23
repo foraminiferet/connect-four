@@ -1,3 +1,4 @@
+# The look of the pieces
 module Figurines
   def yellow_circle
     "\e[33m\u25cf\e[0m"

@@ -2,6 +2,7 @@ require_relative 'board'
 require_relative 'player'
 require_relative 'figurines'
 
+# Game class with game logic and functionality
 class Game
   include Figurines
 

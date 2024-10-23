@@ -1,3 +1,4 @@
+# Player class with the name and symbol
 class Player
   attr_accessor :name, :symbol
 

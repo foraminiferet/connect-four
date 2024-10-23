@@ -104,7 +104,7 @@ describe Game do
     context 'when input is invalid' do
       let(:inputs) { %w[8 a 3] } # Simulate two invalid inputs followed by a valid one
 
-      it 'prompts the user to try again until valid input is received' do
+      it 'prompts the user to try again until valid input is received' do # rubocop:disable RSpec/MultipleExpectations
         expect { game.valid_input }.to output(/Incorrect input please try again/).to_stdout
         expect(game.valid_input).to eq('3')
       end
@@ -113,7 +113,7 @@ describe Game do
     context 'when input is empty' do
       let(:inputs) { ['', '2'] } # Simulate empty input followed by a valid input
 
-      it 'prompts the user to try again until valid input is received' do
+      it 'prompts the user to try again until valid input is received' do # rubocop:disable RSpec/MultipleExpectations
         expect { game.valid_input }.to output(/Incorrect input please try again/).to_stdout
         expect(game.valid_input).to eq('2')
       end
